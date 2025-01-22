@@ -2,6 +2,8 @@
 
 SpaceX data in the comfort of your Terminal.
 
+![Demo](.github/demo.gif)
+
 ## Usage
 
 Clone the repository then run the following command
