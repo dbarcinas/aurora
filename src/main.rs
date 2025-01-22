@@ -18,6 +18,8 @@ fn main() -> color_eyre::Result<()> {
             .unwrap_or_default()
     });
 
+    app.initialize_data();
+
     // Run the app
     let result = app.run(terminal);
 

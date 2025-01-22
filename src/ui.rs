@@ -2,7 +2,7 @@ use crate::app::App;
 use ratatui::{
     layout::{Constraint, Direction, Layout},
     style::{Color, Modifier, Style},
-    text::Span,
+    text::{Line, Span},
     widgets::{Block, Borders, List, ListItem, Paragraph},
     Frame,
 };
@@ -22,7 +22,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         .split(frame.area());
 
     // Header
-    let header = Paragraph::new("SpaceX Data in the Terminal")
+    let header = Paragraph::new("SpaceX Data in the terminal")
         .style(
             Style::default()
                 .fg(Color::White)
@@ -45,7 +45,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
 
     // Left: List of launches
     let items: Vec<_> = app
-        .spacex_data
+        .filtered_data
         .iter()
         .enumerate()
         .map(|(index, launch)| {
@@ -73,7 +73,7 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
     frame.render_stateful_widget(list, content_chunks[0], &mut app.list_state);
 
     // Right: Launch details
-    let details = if let Some(launch) = app.spacex_data.get(app.selected_index) {
+    let details = if let Some(launch) = app.filtered_data.get(app.selected_index) {
         vec![
             format!("Mission: {}", launch.name),
             format!("Date: {}", launch.date_utc),
@@ -98,9 +98,40 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
         .block(Block::default().title(" Details ").borders(Borders::ALL));
     frame.render_widget(paragraph, content_chunks[1]);
 
-    // Footer
-    let footer = Paragraph::new("[q] Quit | [Up/Down] Navigate | [/] Search")
-        .style(Style::default().fg(Color::White))
-        .block(Block::default().borders(Borders::ALL));
-    frame.render_widget(footer, chunks[2]);
+    // Footer or Search Box
+    if app.search_mode {
+        // Get the width of the footer box
+        let width = chunks[2].width as usize;
+
+        // Create the right-aligned "[ESC] Quit" text
+        let quit_text = format!("{:>width$}", "[ESC] Quit", width = width - 1);
+
+        // Combine the search prompt and right-aligned text
+        let search_text = vec![
+            Line::from(vec![
+                Span::raw(" Launch: "),
+                Span::styled(&app.search_query, Style::default().fg(Color::Blue)),
+            ]),
+            Line::from(vec![Span::raw(quit_text)]),
+        ];
+        // render the search box
+        let search = Paragraph::new(search_text)
+            .style(Style::default().fg(Color::White))
+            .block(
+                Block::default()
+                    .borders(Borders::ALL)
+                    .title(" Search | [ESC] Quit "),
+            );
+        frame.render_widget(search, chunks[2]);
+    } else {
+        let footer_text = if app.filtered {
+            "[q] Quit | [Up/Down] Navigate | [/] Search | [ESC] Back to launches"
+        } else {
+            "[q] Quit | [Up/Down] Navigate | [/] Search"
+        };
+        let footer = Paragraph::new(footer_text)
+            .style(Style::default().fg(Color::White))
+            .block(Block::default().borders(Borders::ALL));
+        frame.render_widget(footer, chunks[2]);
+    }
 }
