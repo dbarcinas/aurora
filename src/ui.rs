@@ -86,7 +86,12 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
                 }
             ),
             format!("Rocket: {}", launch.rocket),
+            format!("Flight Number: {}", launch.flight_number),
             format!("Launchpad: {}", launch.launchpad),
+            format!(
+                "Details: {}",
+                launch.details.clone().unwrap_or_else(|| "No details available.".to_string())
+            ),
         ]
         .join("\n")
     } else {
@@ -95,7 +100,8 @@ pub fn draw(frame: &mut Frame, app: &mut App) {
 
     let paragraph = Paragraph::new(details)
         .style(Style::default().fg(Color::White))
-        .block(Block::default().title(" Details ").borders(Borders::ALL));
+        .block(Block::default().title(" Details ").borders(Borders::ALL))
+        .wrap(ratatui::widgets::Wrap { trim: true });
     frame.render_widget(paragraph, content_chunks[1]);
 
     // Footer or Search Box

@@ -7,6 +7,8 @@ pub struct Launch {
     pub success: Option<bool>,
     pub rocket: String,
     pub launchpad: String,
+    pub flight_number: u32,
+    pub details: Option<String>,
 }
 
 pub async fn fetch_spacex_launches() -> Result<Vec<Launch>, reqwest::Error> {
